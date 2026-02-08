@@ -1,23 +1,27 @@
-FROM alpine:3.18
+FROM ubuntu:22.04
 
-RUN apk add --no-cache \
-    luajit \
-    luajit-dev \
-    build-base \
-    cmake \
-    git \
-    openssl-dev \
-    leveldb-dev \
-    leveldb \
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
     curl \
-    bash
+    git \
+    build-essential \
+    cmake \
+    libssl-dev \
+    libleveldb-dev \
+    libleveldb1d \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh
-RUN cp lit /usr/local/bin/lit && cp luvi /usr/local/bin/luvi
 
-COPY . /app
+RUN curl -fsSL https://github.com/luvit/lit-install/raw/master/install.sh | sh && \
+    mv lit luvi luvit /usr/local/bin/
+
+RUN lit install creationix/json && \
+    lit install luvit/secure-socket
+
+COPY . .
 
 EXPOSE 19132/udp
+EXPOSE 8080/tcp
 
-CMD ["./luvit", "main.lua"]
+CMD ["luvit", "main.lua"]
