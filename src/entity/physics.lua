@@ -1,11 +1,17 @@
 local EntityPhysics = {}
 
 function EntityPhysics.update(entity, world)
+    if not entity then return end
+    
     EntityPhysics.checkCollision(entity, world)
 
     if not entity.onGround then
-        entity.motionY = entity.motionY - 0.08
+        entity.motionY = (entity.motionY or 0) - 0.08
     end
+    
+    entity.motionX = entity.motionX or 0
+    entity.motionY = entity.motionY or 0
+    entity.motionZ = entity.motionZ or 0
     
     entity.x = entity.x + entity.motionX
     entity.y = entity.y + entity.motionY
@@ -16,28 +22,12 @@ function EntityPhysics.update(entity, world)
 end
 
 function EntityPhysics.checkCollision(entity, world)
-    local block = world.getBlock(math.floor(entity.x), math.floor(entity.y - 0.1), math.floor(entity.z))
-    
-    if block ~= 0 then
+    if entity.y < 0 then
         entity.onGround = true
         entity.motionY = 0
-        entity.y = math.floor(entity.y) 
+        entity.y = 0
     else
         entity.onGround = false
-    end
-end
-
-function EntityPhysics.handleMovement(entity, newX, newY, newZ)
-    local dist = math.sqrt((newX - entity.x)^2 + (newZ - entity.z)^2)
-    
-    if dist > 10 then 
-        return entity:teleport(entity.x, entity.y, entity.z)
-    end
-
-    entity.x, entity.y, entity.z = newX, newY, newZ
-    
-    if Server and Server.broadcast then
-        Server.broadcast("MoveEntityPacket", {id = entity.id, x = newX, y = newY, z = newZ})
     end
 end
 
