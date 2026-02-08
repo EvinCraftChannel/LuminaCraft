@@ -1,0 +1,7 @@
+libsnappy-dev
+libleveldb-dev
+zlib1g-dev
+cmake
+build-essential
+git
+g++
